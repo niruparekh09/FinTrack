@@ -1,0 +1,73 @@
+######################################
+# General
+######################################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+######################################
+# Node / Vite / React
+######################################
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+######################################
+# Spring Boot / Java
+######################################
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Compiled class files
+*.class
+
+# Logs
+logs/
+*.log
+
+######################################
+# IntelliJ IDEA
+######################################
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+######################################
+# VS Code (if used)
+######################################
+.vscode/
+
+######################################
+# OS & Misc
+######################################
+*.orig
