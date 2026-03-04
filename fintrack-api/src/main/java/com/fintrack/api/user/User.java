@@ -4,11 +4,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users") // matches the table from schema.sql
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -31,4 +37,8 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
