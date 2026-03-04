@@ -1,11 +1,18 @@
 package com.fintrack.api.auth;
 
 import com.fintrack.api.exception.UserAlreadyExistsException;
+import com.fintrack.api.exception.UserNotFoundException;
+import com.fintrack.api.security.JwtUtil;
+import com.fintrack.api.security.UserDetailsServiceImpl;
 import com.fintrack.api.user.User;
 import com.fintrack.api.user.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -13,12 +20,16 @@ public class AuthService {
     private final UserRepository repository;
     private final PasswordEncoder encoder;
     private final AuthMapper mapper;
+    private final UserDetailsServiceImpl userDetailService;
+    private final JwtUtil jwtUtil;
 
 
-    AuthService(UserRepository repo, PasswordEncoder encoder, AuthMapper mapper) {
+    AuthService(UserRepository repo, PasswordEncoder encoder, AuthMapper mapper, UserDetailsServiceImpl userDetailService, JwtUtil util) {
         this.repository = repo;
         this.encoder = encoder;
         this.mapper = mapper;
+        this.userDetailService = userDetailService;
+        this.jwtUtil = util;
     }
 
     // Registers new users. Follows SRP
@@ -43,6 +54,22 @@ public class AuthService {
     }
 
     public AuthResponse login(AuthRequest request) {
-        return new AuthResponse();
+
+        User user = repository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new UserNotFoundException("Invalid Credentials")
+        );
+
+        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid Credentials");
+        }
+
+        UserDetails userDetails = userDetailService.loadUserByUsername(user.getEmail());
+
+        String token = jwtUtil.generateToken(userDetails, user.getId());
+
+        return new AuthResponse(
+                token,
+                LocalDateTime.now()
+        );
     }
 }
