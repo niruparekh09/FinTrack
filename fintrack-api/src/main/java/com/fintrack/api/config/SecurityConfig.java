@@ -1,5 +1,6 @@
 package com.fintrack.api.config;
 
+import com.fintrack.api.security.JwtAuthenticationEntryPoint;
 import com.fintrack.api.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
+    private final JwtAuthenticationEntryPoint entryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter, JwtAuthenticationEntryPoint entryPoint) {
         this.jwtFilter = jwtFilter;
+        this.entryPoint = entryPoint;
     }
 
     @Bean
@@ -27,6 +30,8 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+                .exceptionHandling(ex ->
+                        ex.authenticationEntryPoint(entryPoint))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers ->
