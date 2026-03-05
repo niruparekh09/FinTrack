@@ -3,11 +3,11 @@ spring:
     name: fintrack-api
   datasource:
     url: jdbc:h2:mem:fintrackdb
-    driver-class-name: rg.h2.Driver
+    driver-class-name: org.h2.Driver
     username: sa
     password:
 
-  # H2 Console (access at localhost:8080/h2-console during dev)
+  # H2 Console (access at localhost:8081/h2-console during dev)
   h2:
     console:
       enabled: true
@@ -26,3 +26,5 @@ spring:
 server:
   port: 8081
 
+jwt:
+  secret: mysupersecuremysupersecuremysupersecure
