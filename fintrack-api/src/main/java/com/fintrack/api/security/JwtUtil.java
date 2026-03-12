@@ -1,13 +1,14 @@
 package com.fintrack.api.security;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.Date;
 
 @Component
@@ -18,32 +19,49 @@ public class JwtUtil {
     private String secret;
 
     // This creates a cryptographic key from your secret.
-    private Key getSignKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+    // Fixed wrong return type causing unnecessary casts and unsafe secret encoding
+    private SecretKey getSignKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public String generateToken(UserDetails userDetails, Long id) {
+        long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("userId", id)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + jwtExpiration))
                 .signWith(getSignKey())
                 .compact();
     }
 
     public String extractUsername(String token) {
         return Jwts.parser()
-                .verifyWith((SecretKey) getSignKey())
+                .verifyWith(getSignKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
     }
 
+    // Missing expiration check (critical security flaw)
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
+        try {
+            String username = extractUsername(token);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
 
-        return username.equals(userDetails.getUsername());
+    private boolean isTokenExpired(String token) {
+        Date expiration = Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+        return expiration.before(new Date());
     }
 }

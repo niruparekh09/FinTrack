@@ -27,4 +27,4 @@ server:
   port: 8081
 
 jwt:
-  secret: mysupersecuremysupersecuremysupersecure
+  secret: cWySuHVG0+eskrzylN2u/j1KCVTck0T4kZB1KTlvlTM=

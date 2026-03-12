@@ -32,7 +32,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return user.getName(); // Fixed to solve no name in jwt issue
     }
 
 }
