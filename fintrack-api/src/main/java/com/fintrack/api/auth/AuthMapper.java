@@ -1,5 +1,7 @@
 package com.fintrack.api.auth;
 
+import com.fintrack.api.transaction.Transaction;
+import com.fintrack.api.transaction.TransactionResponse;
 import com.fintrack.api.user.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

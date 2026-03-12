@@ -20,19 +20,42 @@ public class CustomUserDetails implements UserDetails {
         return user.getId();
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+    public String getEmail() {
+        return user.getEmail();
     }
 
     @Override
-    public @Nullable String getPassword() {
-        return "";
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(); // roles can be added later
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword(); // IMPORTANT
     }
 
     @Override
     public String getUsername() {
-        return user.getName(); // Fixed to solve no name in jwt issue
+        return user.getEmail(); // email used as username
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

@@ -1,19 +1,22 @@
 package com.fintrack.api.transaction;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record TransactionRequest(
 
-        TransactionType type,
+        @NotNull TransactionType type,
 
-        String category,
+        @NotBlank String category,
 
-        BigDecimal amount,
+        @NotNull @Positive BigDecimal amount,
 
         String description,
 
-        LocalDate date
-
+        @NotNull LocalDate date
 ) {
 }
