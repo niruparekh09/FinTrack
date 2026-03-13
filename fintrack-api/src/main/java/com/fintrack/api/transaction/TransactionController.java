@@ -41,6 +41,7 @@ public class TransactionController {
     }
 
 
+    // GET /api/transactions?type=EXPENSE&category=Food&page=0&size=5&sort=date,desc
     @GetMapping
     public ResponseEntity<Page<TransactionResponse>> getTransactions(
             @RequestParam(required = false) TransactionType type,
@@ -49,6 +50,8 @@ public class TransactionController {
 
             Pageable pageable
     ) {
-        return null;
+        Page<TransactionResponse> transactionResponses = service.getTransactions(type, category, month, pageable);
+
+        return ResponseEntity.status(HttpStatus.OK).body(transactionResponses);
     }
 }
