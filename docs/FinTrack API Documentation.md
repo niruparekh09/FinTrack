@@ -444,18 +444,3 @@ Backend implemented using:
 * MapStruct
 * H2 / PostgreSQL
 * OpenAPI (Swagger)
-
----
-
-# Optional Improvements for Frontend Integration
-
-Future APIs may include:
-
-* Monthly analytics
-* Category management
-* Budget tracking
-* Charts / spending trends
-
----
-
-If you want, I can also create a **much more impressive "README.md style documentation" for GitHub** that makes this project look like a **production fintech backend** when recruiters view it.
