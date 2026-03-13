@@ -4,6 +4,9 @@ import com.fintrack.api.exception.TransactionNotFoundException;
 import com.fintrack.api.security.SecurityUtils;
 import com.fintrack.api.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,4 +57,22 @@ public class TransactionService {
         return "Transaction " + id + " deleted";
     }
 
+    public Page<TransactionResponse> getTransactions(
+            TransactionType type,
+            String category,
+            Integer month,
+            Pageable pageable) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        Specification<Transaction> spec = TransactionSpecification.filterBy(
+                userId,
+                type,
+                category,
+                month
+        );
+
+        Page<Transaction> transactions = transactionRepository.findAll(spec, pageable);
+
+        return transactions.map(mapper::toTransactionResponse);
+    }
 }
