@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.stream.Collectors;
 
@@ -135,6 +136,17 @@ public class GlobalExceptionHandler {
 
         log.warn("Validation failed: {}", errors);
         return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    }
+
+    // ─── Resource not found exceptions ───────────────────────────────
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(
+            NoResourceFoundException ex) {
+
+        log.warn("Resource not found: {}", ex.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND,
+                "Endpoint not found: " + ex.getResourcePath());
     }
 
     // ─── Catch-all ───────────────────────────────────────────────────
