@@ -32,7 +32,7 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.OK).body(transactionResponse);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTransaction
             (@PathVariable Long id) {
         String delete = service.delete(id);
