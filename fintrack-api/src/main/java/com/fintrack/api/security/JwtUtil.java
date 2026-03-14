@@ -1,25 +1,27 @@
 package com.fintrack.api.security;
 
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.function.Function;
 
+@Slf4j
 @Component
 public class JwtUtil {
 
     private final long jwtExpiration = 1000 * 60 * 60 * 24; // 24h
+
     @Value("${jwt.secret}")
     private String secret;
 
-    // This creates a cryptographic key from your secret.
-    // Fixed wrong return type causing unnecessary casts and unsafe secret encoding
     private SecretKey getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -27,41 +29,65 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails, Long id) {
         long now = System.currentTimeMillis();
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("userId", id)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + jwtExpiration))
                 .signWith(getSignKey())
                 .compact();
+        log.info("Generated JWT token for user: {} with id: {}", userDetails.getUsername(), id);
+        return token;
     }
 
     public String extractUsername(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        try {
+            String username = extractClaim(token, Claims::getSubject);
+            log.debug("Extracted username '{}' from token", username);
+            return username;
+        } catch (Exception e) {
+            log.error("Failed to extract username from token", e);
+            throw e;
+        }
     }
 
-    // Missing expiration check (critical security flaw)
+    private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimResolver.apply(claims);
+    }
+
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSignKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (Exception e) {
+            log.error("Failed to parse JWT token: {}", token, e);
+            throw e;
+        }
+    }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
-            String username = extractUsername(token);
-            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-        } catch (JwtException | IllegalArgumentException e) {
+            final String userName = extractUsername(token);
+            boolean isValid = userName.equals(userDetails.getUsername()) && !isTokenExpired(token);
+            log.debug("Token validation for user '{}': {}", userDetails.getUsername(), isValid);
+            return isValid;
+        } catch (Exception e) {
+            log.warn("Token validation failed for user '{}'", userDetails.getUsername(), e);
             return false;
         }
     }
 
     private boolean isTokenExpired(String token) {
-        Date expiration = Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getExpiration();
-        return expiration.before(new Date());
+        boolean expired = extractExpiration(token).before(new Date());
+        log.debug("Token expired: {}", expired);
+        return expired;
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 }

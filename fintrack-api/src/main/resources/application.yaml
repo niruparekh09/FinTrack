@@ -28,3 +28,9 @@ server:
 
 jwt:
   secret: cWySuHVG0+eskrzylN2u/j1KCVTck0T4kZB1KTlvlTM=
+
+# --- Add logging config ---
+logging:
+  level:
+    root: INFO                  # default level
+    com.fintrack.api.security: DEBUG   # show debug logs for your package
