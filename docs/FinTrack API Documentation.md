@@ -10,7 +10,7 @@ Backend for **FinTrack — Personal Finance Tracking Application**
 **Base URL**
 
 ```
-http://localhost:8080
+http://localhost:8081
 ```
 
 **Authentication**
@@ -348,7 +348,39 @@ GET /api/summary
 
 ---
 
-# 4. Error Responses
+# 4. User API
+
+Provides **Info of current logged-in user**.
+
+Base path:
+
+```
+/api/users/me
+```
+
+---
+
+## Get User
+
+**Endpoint**
+
+```
+GET /api/users/me
+```
+
+### Response
+
+```json
+{
+  "id": 1,
+  "name": "Alex Johnson",
+  "email": "demo@fintrack.com"
+}
+```
+
+---
+
+# 5. Error Responses
 
 All errors follow this format.
 
@@ -364,7 +396,7 @@ All errors follow this format.
 
 ---
 
-# 5. Authentication Flow (Frontend)
+# 6. Authentication Flow (Frontend)
 
 ### Step 1 — Register
 
@@ -408,7 +440,7 @@ Authorization: Bearer <token>
 
 ---
 
-# 6. Example Request with JWT
+# 7. Example Request with JWT
 
 ```
 GET /api/transactions
@@ -417,7 +449,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-# 7. Development Tools
+# 8. Development Tools
 
 Swagger UI available at:
 
@@ -431,9 +463,15 @@ API documentation:
 /v3/api-docs
 ```
 
+H2 Console Available at:
+
+```
+/h2-console
+```
+
 ---
 
-# 8. Tech Stack
+# 9. Tech Stack
 
 Backend implemented using:
 
