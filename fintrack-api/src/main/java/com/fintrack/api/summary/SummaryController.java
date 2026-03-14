@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Transactions")
 public class SummaryController {
 
-    SummaryService summaryService;
+    private final SummaryService summaryService;
 
     @GetMapping
     public ResponseEntity<SummaryResponse> getSummary(){

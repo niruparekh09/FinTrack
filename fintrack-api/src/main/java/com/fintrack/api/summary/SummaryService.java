@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SummaryService {
 
-    TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
 
     public SummaryResponse getSummary() {
         Long userId = SecurityUtils.getCurrentUserId();

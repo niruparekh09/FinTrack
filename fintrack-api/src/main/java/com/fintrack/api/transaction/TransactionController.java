@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Transactions")
 public class TransactionController {
 
-    TransactionService service;
+    private final TransactionService service;
 
     @PostMapping
     public ResponseEntity<TransactionResponse> createTransaction

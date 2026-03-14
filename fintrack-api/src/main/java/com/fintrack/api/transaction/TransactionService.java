@@ -2,7 +2,6 @@ package com.fintrack.api.transaction;
 
 import com.fintrack.api.exception.TransactionNotFoundException;
 import com.fintrack.api.security.SecurityUtils;
-import com.fintrack.api.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,9 +12,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TransactionService {
 
-    UserRepository userRepository;
-    TransactionRepository transactionRepository;
-    TransactionMapper mapper;
+    private final TransactionRepository transactionRepository;
+    private final TransactionMapper mapper;
 
     public TransactionResponse create(TransactionRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
