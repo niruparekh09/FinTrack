@@ -84,7 +84,7 @@ $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 -- Email: demo@fintrack.com | Password: password123
 INSERT INTO users (email, password, name, created_at) VALUES (
     'demo@fintrack.com',
-    '{bcrypt}$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+    '{bcrypt}$2a$10$xnqSFYeyVNNBKUwVkMkaYeCp6ZcHuSgIq7h8RaU1J7WLlg1oEyxY6',
     'Alex Johnson',
     CURRENT_TIMESTAMP
 );
