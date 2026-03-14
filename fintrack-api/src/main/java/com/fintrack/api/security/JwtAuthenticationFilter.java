@@ -1,14 +1,14 @@
 package com.fintrack.api.security;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,17 +17,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private final SecurityContextHolderStrategy securityContextHolderStrategy =
+            SecurityContextHolder.getContextHolderStrategy();
 
     public JwtAuthenticationFilter(
             JwtUtil jwtUtil,
             UserDetailsService userDetailsService) {
-
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -39,12 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Step 1: Read the Authorization header from the request
         String authHeader = request.getHeader("Authorization");
 
-
-        // Step 2: If header is missing OR doesn't start with "Bearer ",
-        // skip JWT validation and continue the filter chain.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -55,41 +52,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String username = jwtUtil.extractUsername(token);
 
-            // Step 3: Continue only if:
-            // - Username exists
-            // - No authentication is already set in the SecurityContext
             if (username != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Load user details from database
+                    securityContextHolderStrategy.getContext().getAuthentication() == null) {
+
                 UserDetails userDetails =
                         userDetailsService.loadUserByUsername(username);
 
-                // Step 4: Validate token against user details
                 if (jwtUtil.isTokenValid(token, userDetails)) {
 
-                    // Step 5: Create authentication object
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
-                                    userDetails,          // Principal (authenticated user)
-                                    null,                 // Credentials (null after login)
-                                    userDetails.getAuthorities() // Roles/permissions
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
                             );
 
-                    // Attach request-specific details (IP, session ID, etc.)
                     authToken.setDetails(
                             new WebAuthenticationDetailsSource()
                                     .buildDetails(request)
                     );
 
-                    // Step 6: Set authentication in SecurityContext
-                    // This tells Spring Security the user is authenticated.
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(authToken);
+                    // Create a NEW context and set it explicitly
+                    SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+                    context.setAuthentication(authToken);
+                    securityContextHolderStrategy.setContext(context);
+
+                    log.info("JWT authentication successful for user '{}'", username);
                 }
             }
-        } catch (JwtException e) {
-            log.warn("Invalid JWT token: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("JWT filter error: {}", e.getMessage(), e);
         }
+
         filterChain.doFilter(request, response);
     }
 }
